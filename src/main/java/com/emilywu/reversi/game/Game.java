@@ -21,13 +21,22 @@ public class Game {
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
+    private GameState state;
+
+    @Column(name = "winner_id")
+    private Player winner;
+
+    @Column(name = "current_player_id", nullable = false)
+    private Player currentPlayer;
+
+    //TODO: validate the 2 players are not the same one
     @ManyToOne
     @JoinColumn(name= "black_player_id", nullable = false)
-    private Player blackPlayerId;
+    private Player blackPlayer;
 
     @ManyToOne
     @JoinColumn(name= "white_player_id", nullable = false)
-    private Player whitePlayerId;
+    private Player whitePlayer;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="board_id")

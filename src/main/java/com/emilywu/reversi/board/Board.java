@@ -28,13 +28,4 @@ public class Board {
     @Column(name = "board", nullable = false)
     private List<String> board;
 
-    @CreationTimestamp
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    @Column(name = "created_at")
-    private ZonedDateTime createdAt;
-
-    @UpdateTimestamp
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    @Column(name = "updated_at")
-    private ZonedDateTime updatedAt;
 }
