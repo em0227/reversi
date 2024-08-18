@@ -1,14 +1,14 @@
 package com.emilywu.reversi.board;
 
-import com.emilywu.reversi.game.Game;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 
-import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,15 +17,18 @@ import java.util.UUID;
 @Entity
 public class Board {
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
-    @OneToOne
-    @JoinColumn(name="game_id")
-    private Game game;
+//    @OneToOne
+//    @JoinColumn(name="game_id")
+//    private Game game;
 
     @Column(name = "board", nullable = false)
-    private List<String> board;
-
+    private ArrayList<List<String>> board;
 }

@@ -2,6 +2,7 @@ package com.emilywu.reversi.game;
 
 import com.emilywu.reversi.board.Board;
 import com.emilywu.reversi.player.Player;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -29,13 +30,14 @@ public class Game {
     @Column(name = "current_player_id", nullable = false)
     private Player currentPlayer;
 
-    //TODO: validate the 2 players are not the same one
+    @JsonBackReference
     @ManyToOne
-    @JoinColumn(name= "black_player_id", nullable = false)
+    @JoinColumn(name = "black_player_id")
     private Player blackPlayer;
 
+    @JsonBackReference
     @ManyToOne
-    @JoinColumn(name= "white_player_id", nullable = false)
+    @JoinColumn(name = "white_player_id")
     private Player whitePlayer;
 
     @OneToOne(fetch = FetchType.EAGER)
