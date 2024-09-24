@@ -20,7 +20,7 @@ public class Player {
     @Id
     @GeneratedValue
     @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+    public UUID id;
 
     @Column(name = "name", nullable = false)
     private String name;

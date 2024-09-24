@@ -1,18 +1,22 @@
 package com.emilywu.reversi.setup;
 
 import com.emilywu.reversi.board.Board;
-import com.emilywu.reversi.board.BoardRepository;
 import com.emilywu.reversi.game.Game;
 import com.emilywu.reversi.game.GameRepository;
 import com.emilywu.reversi.game.GameState;
 import com.emilywu.reversi.player.Player;
 import com.emilywu.reversi.player.PlayerRepository;
+import com.emilywu.reversi.tile.Tile;
+import com.emilywu.reversi.tile.TileColor;
+import com.emilywu.reversi.tile.TileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,27 +24,25 @@ import java.util.List;
 public class DataLoader implements ApplicationRunner {
 
     private PlayerRepository playerRepository;
-    private BoardRepository boardRepository;
     private GameRepository gameRepository;
+    private TileRepository tileRepository;
 
     @Autowired
-    public DataLoader(GameRepository gameRepository, BoardRepository boardRepository, PlayerRepository playerRepository) {
+    public DataLoader(GameRepository gameRepository, PlayerRepository playerRepository, TileRepository tileRepository) {
 
         this.gameRepository = gameRepository;
-        this.boardRepository = boardRepository;
         this.playerRepository = playerRepository;
+        this.tileRepository = tileRepository;
     }
 
     public void run(ApplicationArguments args) {
-        ArrayList<List<String>> board = new ArrayList<>();
+//        ArrayList<List<String>> board = new ArrayList<>();
+//
+//        for (int i = 0; i < 8; i++) {
+//            board.add(new ArrayList<String>(Collections.nCopies(8, "")));
+//        }
 
-        for (int i = 0; i < 8; i++) {
-            board.add(new ArrayList<String>(Collections.nCopies(8, "")));
-        }
 
-        Board gameBoard = new Board();
-        gameBoard.setBoard(board);
-        boardRepository.save(gameBoard);
 
         Player player1 = new Player();
         player1.setName("Emily");
@@ -55,9 +57,23 @@ public class DataLoader implements ApplicationRunner {
         newGame.setState(GameState.NEW);
         newGame.setBlackPlayer(player1);
         newGame.setWhitePlayer(player2);
-        newGame.setCurrentPlayer(player1);
-        newGame.setBoard(gameBoard);
+        newGame.setCurrentPlayerId(player1.id);
 
         gameRepository.save(newGame);
+
+        Tile tile1 = new Tile(3, 3, TileColor.BLACK);
+        Tile tile2 = new Tile(3, 4, TileColor.WHITE);
+        Tile tile3 = new Tile(4, 3, TileColor.BLACK);
+        Tile tile4 = new Tile(4, 4, TileColor.WHITE);
+
+        tile1.setGame(newGame);
+        tile2.setGame(newGame);
+        tile3.setGame(newGame);
+        tile4.setGame(newGame);
+
+        tileRepository.save(tile1);
+        tileRepository.save(tile2);
+        tileRepository.save(tile3);
+        tileRepository.save(tile4);
     }
 }

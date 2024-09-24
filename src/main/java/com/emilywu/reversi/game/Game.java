@@ -2,6 +2,7 @@ package com.emilywu.reversi.game;
 
 import com.emilywu.reversi.board.Board;
 import com.emilywu.reversi.player.Player;
+import com.emilywu.reversi.tile.Tile;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -24,11 +26,13 @@ public class Game {
 
     private GameState state;
 
+//    public Board board;
+
     @Column(name = "winner_id")
-    private Player winner;
+    private UUID winnerId;
 
     @Column(name = "current_player_id", nullable = false)
-    private Player currentPlayer;
+    private UUID currentPlayerId;
 
     @JsonBackReference
     @ManyToOne
@@ -40,9 +44,8 @@ public class Game {
     @JoinColumn(name = "white_player_id")
     private Player whitePlayer;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="board_id")
-    private Board board;
+    @OneToMany(mappedBy = "game")
+    private List<Tile> tiles;
 
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")

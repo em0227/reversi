@@ -1,8 +1,7 @@
 package com.emilywu.reversi.tile;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.emilywu.reversi.game.Game;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,6 +15,7 @@ import static java.time.LocalTime.now;
 @Entity
 public class Tile {
     @Id
+    @GeneratedValue
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
@@ -25,11 +25,12 @@ public class Tile {
     @Column(name = "column_index", updatable = false, nullable = false)
     private int columnIndex;
 
-    @Column(name = "game_index", updatable = false, nullable = false)
-    private int gameId;
+    @ManyToOne
+    @JoinColumn(name = "game_id")
+    private Game game;
 
     @Column(name = "color")
-    private int color;
+    private TileColor color;
 
     @Column(name = "created_at")
     private LocalTime createdAt = now();
@@ -37,8 +38,10 @@ public class Tile {
     @Column(name = "updated_at")
     private LocalTime updatedAt;
 
-//    public Tile (int rowIndex, int columnIndex) {
-//         this.rowIndex = rowIndex;
-//         this.columnIndex = columnIndex;
-//    }
+    //how to ensure row & col combo have to be unique
+    public Tile (int rowIndex, int columnIndex, TileColor color) {
+         this.rowIndex = rowIndex;
+         this.columnIndex = columnIndex;
+         this.color = color;
+    }
 }
