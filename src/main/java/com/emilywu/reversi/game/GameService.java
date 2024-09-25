@@ -2,6 +2,12 @@ package com.emilywu.reversi.game;
 
 import com.emilywu.reversi.board.Board;
 import com.emilywu.reversi.game.dto.GameBoardDto;
+import com.emilywu.reversi.game.dto.updateGameRequestDto;
+import com.emilywu.reversi.player.Player;
+import com.emilywu.reversi.player.PlayerRepository;
+import com.emilywu.reversi.tile.Tile;
+import com.emilywu.reversi.tile.TileColor;
+import com.emilywu.reversi.tile.TileRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,30 +20,85 @@ import java.util.UUID;
 public class GameService {
     @Autowired
     private GameRepository gameRepository;
+    @Autowired
+    private TileRepository tileRepository;
+    @Autowired
+    private PlayerRepository playerRepository;
+
+    //TODO: maybe refactor this into manager class?
+    //TODO: extract the dto part into utils?
 
     public GameBoardDto findGameById(UUID id) throws IOException {
-        //**will this return board too?
-        //**how would player be saved?
         Game game = gameRepository.findById(id).orElseThrow(() -> new IOException("not found"));
         GameBoardDto result = new GameBoardDto(game);
-        Board board = new Board(game.tiles);
-        result.board = board.board;
+        Board board = new Board(game.getTiles());
+        result.board = board.parseBoard();
         return result;
     }
 
 
-    //should I differentiate update when change from PENDING -> NEW (no pos input)?
-    public Game updateGameById(UUID id, List<Integer> pos) throws IOException {
-        Game game = gameRepository.findById(id).orElseThrow(() -> new IOException("not found"));
-        //check first if game state is NOT COMPLETE
-        //**if board does not come with game
-        //Board board = boardRepository.findById(game.board);
-        //board.updateBoard: 1. put piece on pos on board 2. check if new piece causes any flipping (helper methods)
-        //isGameOver: see if there's any more empty space on board (board.isAnyEmptySpace?)
-        //if game is over, update game state, set winner => FE will show proper message
-        //if not over, switch currentPlayer
-        //save game and return game
+    //this update is only updating a NEW or ACTIVE game when player put a new pawn
+    //TODO: refactor error to throw 400 error
+    public GameBoardDto updateGameById(UUID id, updateGameRequestDto request) throws IOException {
+        Game game = gameRepository.findById(id).orElseThrow(() -> new IOException("game not found"));
+        if (game.getState() == GameState.COMPLETE) throw new IOException("this game is complete");
+        if (game.getState() == GameState.PENDING) throw new IOException("this game has not started");
+        if (game.getState() == GameState.NEW) game.setState(GameState.ACTIVE);
+        //TODO: validate pos FE & BE
+        Tile newTile = new Tile(Integer.parseInt(request.getRow()), Integer.parseInt(request.getCol()), request.getColor().equals("BLACK") ? TileColor.BLACK : TileColor.WHITE);
+        newTile.setGame(game);
+        tileRepository.save(newTile);
+        Board board = new Board(game.getTiles());
+        board.isTherePiecesToBeFlipped(newTile);
+
+        if (board.isGameOver()) {
+            game.setState(GameState.COMPLETE);
+            game.setWinnerId(request.getPlayer());
+        } else {
+            if (game.getBlackPlayer().id.equals(request.getPlayer())) {
+                game.setCurrentPlayerId(game.getWhitePlayer().id);
+            } else {
+                game.setCurrentPlayerId(game.getBlackPlayer().id);
+            }
+        }
+
+        GameBoardDto result = new GameBoardDto(game);
+        result.board = board.parseBoard();
         gameRepository.save(game);
-        return game;
+
+        return result;
+    }
+
+    public GameBoardDto createGame(UUID player1, UUID player2) throws IOException {
+        //find players to ensure player exists
+        Player blackPlayer = playerRepository.findById(player1).orElseThrow(() -> new IOException("player1 not found"));
+        Player whitePlayer = playerRepository.findById(player2).orElseThrow(() -> new IOException("player2 not found"));;;
+        Game newGame = new Game();
+        newGame.setState(GameState.NEW);
+        newGame.setBlackPlayer(blackPlayer);
+        newGame.setWhitePlayer(whitePlayer);
+        newGame.setCurrentPlayerId(blackPlayer.id);
+
+        gameRepository.save(newGame);
+
+        Tile tile1 = new Tile(3, 3, TileColor.BLACK);
+        Tile tile2 = new Tile(3, 4, TileColor.WHITE);
+        Tile tile3 = new Tile(4, 3, TileColor.WHITE);
+        Tile tile4 = new Tile(4, 4, TileColor.BLACK);
+
+        tile1.setGame(newGame);
+        tile2.setGame(newGame);
+        tile3.setGame(newGame);
+        tile4.setGame(newGame);
+
+        tileRepository.save(tile1);
+        tileRepository.save(tile2);
+        tileRepository.save(tile3);
+        tileRepository.save(tile4);
+
+        GameBoardDto result = new GameBoardDto(newGame);
+        Board board = new Board(newGame.getTiles());
+        result.board = board.parseBoard();
+        return result;
     }
 }

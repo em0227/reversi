@@ -14,20 +14,75 @@ import java.util.List;
 @Setter
 public class Board {
 
-    public List<List<String>> board = new ArrayList<>();
+    public List<List<Tile>> board = new ArrayList<>();
+    private List<Tile> tiles;
 
     public Board (List<Tile> tiles) {
-
+        this.tiles = tiles;
         for (int i = 0; i < 8; i++) {
-            board.add(new ArrayList<String>(Collections.nCopies(8, "")));
+            board.add(new ArrayList<Tile>(Collections.nCopies(8, null)));
         }
 
-        for (int i = 0; i < tiles.size(); i++) {
-            Tile current = tiles.get(i);
+        for (Tile current : tiles) {
             int row = current.getRowIndex();
             int col = current.getColumnIndex();
-            TileColor color = current.getColor();
-            board.get(row).set(col, color.toString());
+            board.get(row).set(col, current);
         }
+    }
+
+    public void isTherePiecesToBeFlipped (Tile newTile) {
+        int newTileRow = newTile.getRowIndex();
+        int newTileCol = newTile.getColumnIndex();
+        TileColor newTileColor = newTile.getColor();
+        int[][] directions = {{1,0}, {-1,0}, {0,1}, {1,0}, {1,1}, {-1,-1}, {1,-1}, {-1, 1} };
+
+        for (int[] direction : directions) {
+            int rowDir = direction[0];
+            int colDir = direction[1];
+            if (board.get(newTileRow + rowDir).get(newTileCol + colDir) != null && !board.get(newTileRow + rowDir).get(newTileCol + colDir).getColor().equals(newTileColor)) {
+                flipPieces(newTileRow + rowDir, newTileCol + colDir, rowDir, colDir, newTileColor);
+            }
+        }
+    }
+
+    private boolean flipPieces (int row, int col, int rowDir, int colDir, TileColor color) {
+        if (outOfBoard(row, col) || board.get(row).get(col) == null) return false;
+        if (board.get(row).get(col).getColor().equals(color)) return true;
+
+        boolean result = flipPieces(row + rowDir, col +colDir, rowDir, colDir, color);
+        if (result) {
+            Tile tile = board.get(row).get(col);
+            tile.setColor(color);
+        }
+        return result;
+    }
+
+    private boolean outOfBoard (int row, int col) {
+        return row < 0 || row >= 8 || col < 0 || col >= 8;
+    }
+
+    public boolean isGameOver () {
+        for (List<Tile> tileList : board) {
+            for (Tile tile : tileList) {
+                if (tile == null) return false;
+            }
+        }
+        return true;
+    }
+
+    public List<List<String>> parseBoard () {
+        List<List<String>> parsedBoard = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            parsedBoard.add(new ArrayList<>(Collections.nCopies(8, "")));
+        }
+
+        for (Tile current : this.tiles) {
+            int row = current.getRowIndex();
+            int col = current.getColumnIndex();
+            String color = current.getColor().toString();
+            parsedBoard.get(row).set(col, color);
+        }
+
+        return parsedBoard;
     }
 }
