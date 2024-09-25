@@ -34,11 +34,12 @@ public class Board {
         int newTileRow = newTile.getRowIndex();
         int newTileCol = newTile.getColumnIndex();
         TileColor newTileColor = newTile.getColor();
-        int[][] directions = {{1,0}, {-1,0}, {0,1}, {1,0}, {1,1}, {-1,-1}, {1,-1}, {-1, 1} };
+        int[][] directions = {{1,0}, {-1,0}, {0,1}, {0, -1}, {1,1}, {-1,-1}, {1,-1}, {-1, 1} };
 
         for (int[] direction : directions) {
             int rowDir = direction[0];
             int colDir = direction[1];
+            if (outOfBoard(newTileRow + rowDir, newTileCol + colDir)) continue;
             if (board.get(newTileRow + rowDir).get(newTileCol + colDir) != null && !board.get(newTileRow + rowDir).get(newTileCol + colDir).getColor().equals(newTileColor)) {
                 flipPieces(newTileRow + rowDir, newTileCol + colDir, rowDir, colDir, newTileColor);
             }
