@@ -1,6 +1,5 @@
 package com.emilywu.reversi.setup;
 
-import com.emilywu.reversi.board.Board;
 import com.emilywu.reversi.game.Game;
 import com.emilywu.reversi.game.GameRepository;
 import com.emilywu.reversi.game.GameState;
@@ -13,12 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 @Component
 public class DataLoader implements ApplicationRunner {
@@ -36,14 +29,6 @@ public class DataLoader implements ApplicationRunner {
     }
 
     public void run(ApplicationArguments args) {
-//        ArrayList<List<String>> board = new ArrayList<>();
-//
-//        for (int i = 0; i < 8; i++) {
-//            board.add(new ArrayList<String>(Collections.nCopies(8, "")));
-//        }
-
-
-
         Player player1 = new Player();
         player1.setName("Emily");
 

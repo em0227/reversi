@@ -1,5 +1,7 @@
 package com.emilywu.reversi.game;
 
+import com.emilywu.reversi.board.Board;
+import com.emilywu.reversi.game.dto.GameBoardDto;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,16 +15,20 @@ public class GameService {
     @Autowired
     private GameRepository gameRepository;
 
-    public Game findGameById(UUID id) throws IOException {
+    public GameBoardDto findGameById(UUID id) throws IOException {
         //**will this return board too?
         //**how would player be saved?
-        return gameRepository.findById(id).orElseThrow(() -> new IOException("not found"));
+        Game game = gameRepository.findById(id).orElseThrow(() -> new IOException("not found"));
+        GameBoardDto result = new GameBoardDto(game);
+        Board board = new Board(game.tiles);
+        result.board = board.board;
+        return result;
     }
 
 
     //should I differentiate update when change from PENDING -> NEW (no pos input)?
     public Game updateGameById(UUID id, List<Integer> pos) throws IOException {
-        Game game = findGameById(id);
+        Game game = gameRepository.findById(id).orElseThrow(() -> new IOException("not found"));
         //check first if game state is NOT COMPLETE
         //**if board does not come with game
         //Board board = boardRepository.findById(game.board);

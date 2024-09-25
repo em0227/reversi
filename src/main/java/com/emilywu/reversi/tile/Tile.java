@@ -44,4 +44,7 @@ public class Tile {
          this.columnIndex = columnIndex;
          this.color = color;
     }
+
+    public Tile() {
+    }
 }

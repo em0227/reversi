@@ -45,7 +45,7 @@ public class Game {
     private Player whitePlayer;
 
     @OneToMany(mappedBy = "game")
-    private List<Tile> tiles;
+    public List<Tile> tiles;
 
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
