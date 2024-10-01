@@ -1,7 +1,8 @@
 package com.emilywu.reversi.game;
 
+import com.emilywu.reversi.game.dto.CreateGameDto;
 import com.emilywu.reversi.game.dto.GameBoardDto;
-import com.emilywu.reversi.game.dto.updateGameRequestDto;
+import com.emilywu.reversi.game.dto.UpdateGameRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,12 +21,12 @@ public class GameController {
     }
 
     @PostMapping
-    public GameBoardDto createGame (@RequestBody UUID player1, UUID player2) throws IOException {
-        return gameService.createGame(player1, player2);
+    public UUID createGame (@RequestBody CreateGameDto request) throws IOException {
+        return gameService.createGame(request.getPlayer1(), request.getPlayer2());
     }
 
     @PutMapping("/{game_id}")
-    public GameBoardDto updateGame (@PathVariable UUID game_id, @RequestBody updateGameRequestDto request) throws IOException {
+    public GameBoardDto updateGame (@PathVariable UUID game_id, @RequestBody UpdateGameRequestDto request) throws IOException {
         System.out.println("hit put");
         return gameService.updateGameById(game_id, request);
     }

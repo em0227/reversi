@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class updateGameRequestDto {
+public class UpdateGameRequestDto {
     private String row;
     private String col;
     private String color;

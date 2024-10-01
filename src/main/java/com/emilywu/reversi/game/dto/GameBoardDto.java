@@ -18,8 +18,8 @@ public class GameBoardDto {
     private GameState state;
     private UUID winnerId;
     private UUID currentPlayerId;
-    private UUID blackPlayer;
-    private UUID whitePlayer;
+    private PlayerDto blackPlayer;
+    private PlayerDto whitePlayer;
     public List<List<String>> board;
 //    private ZonedDateTime createdAt;
 //    private ZonedDateTime updatedAt;
@@ -29,8 +29,8 @@ public class GameBoardDto {
         this.state = game.getState();
         this.winnerId = game.getWinnerId();
         this.currentPlayerId = game.getCurrentPlayerId();
-        this.blackPlayer = game.getBlackPlayer().getId();
-        this.whitePlayer = game.getWhitePlayer().getId();
+        this.blackPlayer = new PlayerDto(game.getBlackPlayer().getId(), game.getBlackPlayer().getName());
+        this.whitePlayer = new PlayerDto(game.getWhitePlayer().getId(), game.getWhitePlayer().getName());
 //        this.createdAt = game.getCreatedAt();
 //        this.updatedAt = game.getUpdatedAt();
     }

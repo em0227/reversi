@@ -2,7 +2,7 @@ package com.emilywu.reversi.game;
 
 import com.emilywu.reversi.board.Board;
 import com.emilywu.reversi.game.dto.GameBoardDto;
-import com.emilywu.reversi.game.dto.updateGameRequestDto;
+import com.emilywu.reversi.game.dto.UpdateGameRequestDto;
 import com.emilywu.reversi.player.Player;
 import com.emilywu.reversi.player.PlayerRepository;
 import com.emilywu.reversi.tile.Tile;
@@ -39,7 +39,7 @@ public class GameService {
 
     //this update is only updating a NEW or ACTIVE game when player put a new pawn
     //TODO: refactor error to throw 400 error
-    public GameBoardDto updateGameById(UUID id, updateGameRequestDto request) throws IOException {
+    public GameBoardDto updateGameById(UUID id, UpdateGameRequestDto request) throws IOException {
         Game game = gameRepository.findById(id).orElseThrow(() -> new IOException("game not found"));
         if (game.getState() == GameState.COMPLETE) throw new IOException("this game is complete");
         if (game.getState() == GameState.PENDING) throw new IOException("this game has not started");
@@ -52,8 +52,13 @@ public class GameService {
         board.isTherePiecesToBeFlipped(newTile);
 
         if (board.isGameOver()) {
+            String winningColor = board.whoIsWinner();
+            if (winningColor.equals("BLACK")) {
+                game.setWinnerId(game.getBlackPlayer().id);
+            } else {
+                game.setWinnerId(game.getWhitePlayer().id);
+            }
             game.setState(GameState.COMPLETE);
-            game.setWinnerId(request.getPlayer());
         } else {
             if (game.getBlackPlayer().id.equals(request.getPlayer())) {
                 game.setCurrentPlayerId(game.getWhitePlayer().id);
@@ -69,7 +74,7 @@ public class GameService {
         return result;
     }
 
-    public GameBoardDto createGame(UUID player1, UUID player2) throws IOException {
+    public UUID createGame(UUID player1, UUID player2) throws IOException {
         //find players to ensure player exists
         Player blackPlayer = playerRepository.findById(player1).orElseThrow(() -> new IOException("player1 not found"));
         Player whitePlayer = playerRepository.findById(player2).orElseThrow(() -> new IOException("player2 not found"));;;
@@ -96,9 +101,6 @@ public class GameService {
         tileRepository.save(tile3);
         tileRepository.save(tile4);
 
-        GameBoardDto result = new GameBoardDto(newGame);
-        Board board = new Board(newGame.getTiles());
-        result.board = board.parseBoard();
-        return result;
+        return newGame.getId();
     }
 }

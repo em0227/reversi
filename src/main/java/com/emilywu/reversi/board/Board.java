@@ -71,6 +71,20 @@ public class Board {
         return true;
     }
 
+    public String whoIsWinner () {
+        int blackCount = 0;
+        int whiteCount = 0;
+        for (List<Tile> tileList : board) {
+            for (Tile tile : tileList) {
+                if (tile.getColor().equals(TileColor.BLACK)) blackCount++;
+                if (tile.getColor().equals(TileColor.WHITE)) whiteCount++;
+            }
+        }
+        if (blackCount > whiteCount) return "BLACK";
+        if (blackCount < whiteCount) return "WHITE";
+        return "TIE";
+    }
+
     public List<List<String>> parseBoard () {
         List<List<String>> parsedBoard = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
