@@ -2,12 +2,9 @@ package com.emilywu.reversi.game.dto;
 
 import com.emilywu.reversi.game.Game;
 import com.emilywu.reversi.game.GameState;
-import com.emilywu.reversi.player.Player;
-import com.emilywu.reversi.tile.Tile;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,8 +18,8 @@ public class GameBoardDto {
     private PlayerDto blackPlayer;
     private PlayerDto whitePlayer;
     public List<List<String>> board;
-//    private ZonedDateTime createdAt;
-//    private ZonedDateTime updatedAt;
+    private int winByHowMany;
+    private List<List<Integer>> possibleMoves;
 
     public GameBoardDto(Game game) {
         this.id = game.getId();
@@ -31,7 +28,6 @@ public class GameBoardDto {
         this.currentPlayerId = game.getCurrentPlayerId();
         this.blackPlayer = new PlayerDto(game.getBlackPlayer().getId(), game.getBlackPlayer().getName());
         this.whitePlayer = new PlayerDto(game.getWhitePlayer().getId(), game.getWhitePlayer().getName());
-//        this.createdAt = game.getCreatedAt();
-//        this.updatedAt = game.getUpdatedAt();
+        this.winByHowMany = game.getWinByHowMany();
     }
 }

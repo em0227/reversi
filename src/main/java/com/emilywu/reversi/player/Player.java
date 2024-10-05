@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.ZonedDateTime;
@@ -32,6 +33,9 @@ public class Player {
     @JsonManagedReference
     @OneToMany(mappedBy = "whitePlayer")
     private List<Game> gamesAsWhite;
+
+    @Formula(value = "(SELECT COUNT(*) FROM game g WHERE g.winner_id=id)")
+    private long wins;
 
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")

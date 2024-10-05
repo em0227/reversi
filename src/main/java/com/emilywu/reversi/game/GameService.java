@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -32,7 +34,8 @@ public class GameService {
         Game game = gameRepository.findById(id).orElseThrow(() -> new IOException("not found"));
         GameBoardDto result = new GameBoardDto(game);
         Board board = new Board(game.getTiles());
-        result.board = board.parseBoard();
+        result.setBoard(board.parseBoard());
+        result.setPossibleMoves(board.possibleMoves(TileColor.BLACK));
         return result;
     }
 
@@ -52,13 +55,16 @@ public class GameService {
         board.isTherePiecesToBeFlipped(newTile);
 
         if (board.isGameOver()) {
-            String winningColor = board.whoIsWinner();
-            if (winningColor.equals("BLACK")) {
-                game.setWinnerId(game.getBlackPlayer().id);
-            } else {
-                game.setWinnerId(game.getWhitePlayer().id);
-            }
+            Map<String, Object> winningResult = board.whoIsWinner();
             game.setState(GameState.COMPLETE);
+            game.setWinByHowMany((int) winningResult.get("count"));
+            if (winningResult.get("winner").equals("BLACK")) {
+                game.setWinnerId(game.getBlackPlayer().id);
+            } else if (winningResult.get("winner").equals("WHITE")) {
+                game.setWinnerId(game.getWhitePlayer().id);
+            } else {
+                game.setState(GameState.TIE);
+            }
         } else {
             if (game.getBlackPlayer().id.equals(request.getPlayer())) {
                 game.setCurrentPlayerId(game.getWhitePlayer().id);
@@ -67,9 +73,10 @@ public class GameService {
             }
         }
 
-        GameBoardDto result = new GameBoardDto(game);
-        result.board = board.parseBoard();
         gameRepository.save(game);
+        GameBoardDto result = new GameBoardDto(game);
+        result.setPossibleMoves(board.possibleMoves(request.getColor().equals("BLACK") ? TileColor.WHITE : TileColor.BLACK));
+        result.setBoard(board.parseBoard());
 
         return result;
     }

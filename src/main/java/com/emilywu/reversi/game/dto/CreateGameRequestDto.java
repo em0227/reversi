@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class CreateGameDto {
+public class CreateGameRequestDto {
     private UUID player1;
     private UUID player2;
 }

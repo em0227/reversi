@@ -26,8 +26,6 @@ public class Game {
 
     private GameState state;
 
-//    public Board board;
-
     @Column(name = "winner_id")
     private UUID winnerId;
 
@@ -43,6 +41,9 @@ public class Game {
     @ManyToOne
     @JoinColumn(name = "white_player_id")
     private Player whitePlayer;
+
+    @Column(name = "wind_by_how_many")
+    private int winByHowMany = 0;
 
     @OneToMany(mappedBy = "game")
     public List<Tile> tiles;

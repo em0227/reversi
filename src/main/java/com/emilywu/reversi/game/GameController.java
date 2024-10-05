@@ -1,6 +1,6 @@
 package com.emilywu.reversi.game;
 
-import com.emilywu.reversi.game.dto.CreateGameDto;
+import com.emilywu.reversi.game.dto.CreateGameRequestDto;
 import com.emilywu.reversi.game.dto.GameBoardDto;
 import com.emilywu.reversi.game.dto.UpdateGameRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ public class GameController {
     }
 
     @PostMapping
-    public UUID createGame (@RequestBody CreateGameDto request) throws IOException {
+    public UUID createGame (@RequestBody CreateGameRequestDto request) throws IOException {
         return gameService.createGame(request.getPlayer1(), request.getPlayer2());
     }
 
