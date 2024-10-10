@@ -20,6 +20,7 @@ public class GameBoardDto {
     public List<List<String>> board;
     private int winByHowMany;
     private List<List<Integer>> possibleMoves;
+    private String errorMessage;
 
     public GameBoardDto(Game game) {
         this.id = game.getId();
@@ -29,5 +30,9 @@ public class GameBoardDto {
         this.blackPlayer = new PlayerDto(game.getBlackPlayer().getId(), game.getBlackPlayer().getName());
         this.whitePlayer = new PlayerDto(game.getWhitePlayer().getId(), game.getWhitePlayer().getName());
         this.winByHowMany = game.getWinByHowMany();
+    }
+
+    public GameBoardDto(String message) {
+        this.errorMessage = message;
     }
 }

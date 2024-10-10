@@ -27,7 +27,8 @@ public class Board {
         }
     }
 
-    public void isTherePiecesToBeFlipped (Tile newTile) {
+    public boolean isTherePiecesToBeFlipped (Tile newTile) {
+        boolean isValidMove = false;
         int newTileRow = newTile.getRowIndex();
         int newTileCol = newTile.getColumnIndex();
         TileColor newTileColor = newTile.getColor();
@@ -38,9 +39,12 @@ public class Board {
             int colDir = direction[1];
             if (outOfBoard(newTileRow + rowDir, newTileCol + colDir)) continue;
             if (board.get(newTileRow + rowDir).get(newTileCol + colDir) != null && !board.get(newTileRow + rowDir).get(newTileCol + colDir).getColor().equals(newTileColor)) {
-                flipPieces(newTileRow + rowDir, newTileCol + colDir, rowDir, colDir, newTileColor);
+                boolean result = flipPieces(newTileRow + rowDir, newTileCol + colDir, rowDir, colDir, newTileColor);
+                if (result) isValidMove = true;
             }
         }
+
+        return isValidMove;
     }
 
     private boolean flipPieces (int row, int col, int rowDir, int colDir, TileColor color) {

@@ -8,14 +8,13 @@ import com.emilywu.reversi.player.PlayerRepository;
 import com.emilywu.reversi.tile.Tile;
 import com.emilywu.reversi.tile.TileColor;
 import com.emilywu.reversi.tile.TileRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -35,24 +34,30 @@ public class GameService {
         GameBoardDto result = new GameBoardDto(game);
         Board board = new Board(game.getTiles());
         result.setBoard(board.parseBoard());
-        result.setPossibleMoves(board.possibleMoves(TileColor.BLACK));
+        result.setPossibleMoves(board.possibleMoves(game.getCurrentPlayerId() == game.getBlackPlayer().id ? TileColor.BLACK : TileColor.WHITE));
         return result;
     }
 
 
-    //this update is only updating a NEW or ACTIVE game when player put a new pawn
-    //TODO: refactor error to throw 400 error
-    public GameBoardDto updateGameById(UUID id, UpdateGameRequestDto request) throws IOException {
+    public ResponseEntity<GameBoardDto> updateGameById(UUID id, UpdateGameRequestDto request) throws IOException {
         Game game = gameRepository.findById(id).orElseThrow(() -> new IOException("game not found"));
-        if (game.getState() == GameState.COMPLETE) throw new IOException("this game is complete");
-        if (game.getState() == GameState.PENDING) throw new IOException("this game has not started");
+        if (game.getState() == GameState.COMPLETE || game.getState() == GameState.TIE) {
+            return new ResponseEntity<>(new GameBoardDto("this game is complete"), HttpStatus.BAD_REQUEST);
+        }
+        if (game.getState() == GameState.PENDING) {
+            return new ResponseEntity<>(new GameBoardDto("this game has not started"), HttpStatus.BAD_REQUEST);
+        }
         if (game.getState() == GameState.NEW) game.setState(GameState.ACTIVE);
-        //TODO: validate pos FE & BE
+
         Tile newTile = new Tile(Integer.parseInt(request.getRow()), Integer.parseInt(request.getCol()), request.getColor().equals("BLACK") ? TileColor.BLACK : TileColor.WHITE);
         newTile.setGame(game);
         tileRepository.save(newTile);
         Board board = new Board(game.getTiles());
-        board.isTherePiecesToBeFlipped(newTile);
+        boolean isValidMove = board.isTherePiecesToBeFlipped(newTile);
+        if (!isValidMove) {
+            tileRepository.deleteById(newTile.getId());
+            return new ResponseEntity<>(new GameBoardDto("invalid move"), HttpStatus.BAD_REQUEST);
+        }
 
         if (board.isGameOver()) {
             Map<String, Object> winningResult = board.whoIsWinner();
@@ -78,7 +83,7 @@ public class GameService {
         result.setPossibleMoves(board.possibleMoves(request.getColor().equals("BLACK") ? TileColor.WHITE : TileColor.BLACK));
         result.setBoard(board.parseBoard());
 
-        return result;
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     public UUID createGame(UUID player1, UUID player2) throws IOException {

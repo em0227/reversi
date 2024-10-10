@@ -4,6 +4,7 @@ import com.emilywu.reversi.game.dto.CreateGameRequestDto;
 import com.emilywu.reversi.game.dto.GameBoardDto;
 import com.emilywu.reversi.game.dto.UpdateGameRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class GameController {
     }
 
     @PutMapping("/{game_id}")
-    public GameBoardDto updateGame (@PathVariable UUID game_id, @RequestBody UpdateGameRequestDto request) throws IOException {
+    public ResponseEntity<GameBoardDto> updateGame (@PathVariable UUID game_id, @RequestBody UpdateGameRequestDto request) throws IOException {
         System.out.println("hit put");
         return gameService.updateGameById(game_id, request);
     }
