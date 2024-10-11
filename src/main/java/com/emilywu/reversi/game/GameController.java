@@ -17,12 +17,12 @@ public class GameController {
     private GameService gameService;
 
     @GetMapping("/{game_id}")
-    public GameBoardDto getGame (@PathVariable UUID game_id) throws IOException {
+    public ResponseEntity<GameBoardDto> getGame (@PathVariable UUID game_id) throws IOException {
         return gameService.findGameById(game_id);
     }
 
     @PostMapping
-    public UUID createGame (@RequestBody CreateGameRequestDto request) throws IOException {
+    public ResponseEntity<UUID> createGame (@RequestBody CreateGameRequestDto request) throws IOException {
         return gameService.createGame(request.getPlayer1(), request.getPlayer2());
     }
 

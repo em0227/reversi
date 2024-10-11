@@ -29,13 +29,13 @@ public class GameService {
     //TODO: maybe refactor this into manager class?
     //TODO: extract the dto part into utils?
 
-    public GameBoardDto findGameById(UUID id) throws IOException {
+    public ResponseEntity<GameBoardDto> findGameById(UUID id) throws IOException {
         Game game = gameRepository.findById(id).orElseThrow(() -> new IOException("not found"));
         GameBoardDto result = new GameBoardDto(game);
         Board board = new Board(game.getTiles());
         result.setBoard(board.parseBoard());
-        result.setPossibleMoves(board.possibleMoves(game.getCurrentPlayerId() == game.getBlackPlayer().id ? TileColor.BLACK : TileColor.WHITE));
-        return result;
+        result.setPossibleMoves(board.possibleMoves(game.getCurrentPlayerId().equals(game.getBlackPlayer().id) ? TileColor.BLACK : TileColor.WHITE));
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 
@@ -86,7 +86,7 @@ public class GameService {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    public UUID createGame(UUID player1, UUID player2) throws IOException {
+    public ResponseEntity<UUID> createGame(UUID player1, UUID player2) throws IOException {
         //find players to ensure player exists
         Player blackPlayer = playerRepository.findById(player1).orElseThrow(() -> new IOException("player1 not found"));
         Player whitePlayer = playerRepository.findById(player2).orElseThrow(() -> new IOException("player2 not found"));;;
@@ -113,6 +113,6 @@ public class GameService {
         tileRepository.save(tile3);
         tileRepository.save(tile4);
 
-        return newGame.getId();
+        return new ResponseEntity<>(newGame.getId(), HttpStatus.OK);
     }
 }
