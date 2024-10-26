@@ -29,61 +29,69 @@ public class GameService {
     //TODO: maybe refactor this into manager class?
     //TODO: extract the dto part into utils?
 
-    public ResponseEntity<GameBoardDto> findGameById(UUID id) throws IOException {
-        Game game = gameRepository.findById(id).orElseThrow(() -> new IOException("not found"));
-        GameBoardDto result = new GameBoardDto(game);
-        Board board = new Board(game.getTiles());
-        result.setBoard(board.parseBoard());
-        result.setPossibleMoves(board.possibleMoves(game.getCurrentPlayerId().equals(game.getBlackPlayer().id) ? TileColor.BLACK : TileColor.WHITE));
-        return new ResponseEntity<>(result, HttpStatus.OK);
+    public ResponseEntity<GameBoardDto> findGameById(UUID id) {
+        try {
+            Game game = gameRepository.findById(id).orElseThrow(() -> new IOException("not found"));
+            GameBoardDto result = new GameBoardDto(game);
+            Board board = new Board(game.getTiles());
+            result.setBoard(board.parseBoard());
+            result.setPossibleMoves(board.possibleMoves(game.getCurrentPlayerId().equals(game.getBlackPlayer().id) ? TileColor.BLACK : TileColor.WHITE));
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (IOException error) {
+            return new ResponseEntity<>(new GameBoardDto("Can not find this game"), HttpStatus.BAD_REQUEST);
+        }
     }
 
 
     public ResponseEntity<GameBoardDto> updateGameById(UUID id, UpdateGameRequestDto request) throws IOException {
-        Game game = gameRepository.findById(id).orElseThrow(() -> new IOException("game not found"));
-        if (game.getState() == GameState.COMPLETE || game.getState() == GameState.TIE) {
-            return new ResponseEntity<>(new GameBoardDto("this game is complete"), HttpStatus.BAD_REQUEST);
-        }
-        if (game.getState() == GameState.PENDING) {
-            return new ResponseEntity<>(new GameBoardDto("this game has not started"), HttpStatus.BAD_REQUEST);
-        }
-        if (game.getState() == GameState.NEW) game.setState(GameState.ACTIVE);
-
-        Tile newTile = new Tile(Integer.parseInt(request.getRow()), Integer.parseInt(request.getCol()), request.getColor().equals("BLACK") ? TileColor.BLACK : TileColor.WHITE);
-        newTile.setGame(game);
-        tileRepository.save(newTile);
-        Board board = new Board(game.getTiles());
-        boolean isValidMove = board.isTherePiecesToBeFlipped(newTile);
-        if (!isValidMove) {
-            tileRepository.deleteById(newTile.getId());
-            return new ResponseEntity<>(new GameBoardDto("invalid move"), HttpStatus.BAD_REQUEST);
-        }
-
-        if (board.isGameOver()) {
-            Map<String, Object> winningResult = board.whoIsWinner();
-            game.setState(GameState.COMPLETE);
-            game.setWinByHowMany((int) winningResult.get("count"));
-            if (winningResult.get("winner").equals("BLACK")) {
-                game.setWinnerId(game.getBlackPlayer().id);
-            } else if (winningResult.get("winner").equals("WHITE")) {
-                game.setWinnerId(game.getWhitePlayer().id);
-            } else {
-                game.setState(GameState.TIE);
+        try {
+            Game game = gameRepository.findById(id).orElseThrow(() -> new IOException("game not found"));
+            if (game.getState() == GameState.COMPLETE || game.getState() == GameState.TIE) {
+                return new ResponseEntity<>(new GameBoardDto("This game is complete"), HttpStatus.BAD_REQUEST);
             }
-        } else {
-            if (game.getBlackPlayer().id.equals(request.getPlayer())) {
-                game.setCurrentPlayerId(game.getWhitePlayer().id);
-            } else {
-                game.setCurrentPlayerId(game.getBlackPlayer().id);
+            if (game.getState() == GameState.PENDING) {
+                return new ResponseEntity<>(new GameBoardDto("This game has not started"), HttpStatus.BAD_REQUEST);
             }
+            if (game.getState() == GameState.NEW) game.setState(GameState.ACTIVE);
+
+            Tile newTile = new Tile(Integer.parseInt(request.getRow()), Integer.parseInt(request.getCol()), request.getColor().equals("BLACK") ? TileColor.BLACK : TileColor.WHITE);
+            newTile.setGame(game);
+            tileRepository.save(newTile);
+            Board board = new Board(game.getTiles());
+            boolean isValidMove = board.isTherePiecesToBeFlipped(newTile);
+            if (!isValidMove) {
+                tileRepository.deleteById(newTile.getId());
+                return new ResponseEntity<>(new GameBoardDto("Invalid move"), HttpStatus.BAD_REQUEST);
+            }
+
+            if (board.isGameOver()) {
+                Map<String, Object> winningResult = board.whoIsWinner();
+                game.setState(GameState.COMPLETE);
+                game.setWinByHowMany((int) winningResult.get("count"));
+                if (winningResult.get("winner").equals("BLACK")) {
+                    game.setWinnerId(game.getBlackPlayer().id);
+                } else if (winningResult.get("winner").equals("WHITE")) {
+                    game.setWinnerId(game.getWhitePlayer().id);
+                } else {
+                    game.setState(GameState.TIE);
+                }
+            } else {
+                if (game.getBlackPlayer().id.equals(request.getPlayer())) {
+                    game.setCurrentPlayerId(game.getWhitePlayer().id);
+                } else {
+                    game.setCurrentPlayerId(game.getBlackPlayer().id);
+                }
+            }
+
+            gameRepository.save(game);
+            GameBoardDto result = new GameBoardDto(game);
+            result.setPossibleMoves(board.possibleMoves(request.getColor().equals("BLACK") ? TileColor.WHITE : TileColor.BLACK));
+            result.setBoard(board.parseBoard());
+
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (IOException error) {
+            return new ResponseEntity<>(new GameBoardDto("Can not find this game"), HttpStatus.BAD_REQUEST);
         }
-
-        gameRepository.save(game);
-        GameBoardDto result = new GameBoardDto(game);
-        result.setPossibleMoves(board.possibleMoves(request.getColor().equals("BLACK") ? TileColor.WHITE : TileColor.BLACK));
-        result.setBoard(board.parseBoard());
-
-        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     public ResponseEntity<UUID> createGame(UUID player1, UUID player2) throws IOException {
