@@ -106,10 +106,10 @@ public class GameService {
 
         gameRepository.save(newGame);
 
-        Tile tile1 = new Tile(3, 3, TileColor.BLACK);
-        Tile tile2 = new Tile(3, 4, TileColor.WHITE);
-        Tile tile3 = new Tile(4, 3, TileColor.WHITE);
-        Tile tile4 = new Tile(4, 4, TileColor.BLACK);
+        Tile tile1 = new Tile(3, 3, TileColor.WHITE);
+        Tile tile2 = new Tile(3, 4, TileColor.BLACK);
+        Tile tile3 = new Tile(4, 3, TileColor.BLACK);
+        Tile tile4 = new Tile(4, 4, TileColor.WHITE);
 
         tile1.setGame(newGame);
         tile2.setGame(newGame);
