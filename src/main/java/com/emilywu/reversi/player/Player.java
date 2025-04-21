@@ -26,6 +26,13 @@ public class Player {
     @Column(name = "name", nullable = false)
     private String name;
 
+    //TODO make this nullable false
+    @Column(name = "email", unique = true, nullable = true)
+    public String email;
+
+    @Column(name="google_id", unique = true)
+    public String googleId;
+
     @JsonManagedReference
     @OneToMany(mappedBy = "blackPlayer")
     private List<Game> gamesAsBlack;
